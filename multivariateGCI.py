@@ -48,7 +48,8 @@ class MultivariateGCI(QuantumCircuit):
         self.normal_max_value = normal_max_value
         self.p_zeros = p_zeros
         self.rhos = rhos
-        num_qubits = n_normal*len(sectors) + len(p_zeros)
+        self.sectors = len(alphas_list[0])
+        num_qubits = n_normal*self.sectors + len(p_zeros)
 
         # get normal (inverse) CDF and pdf (these names are from the paper, therefore ignore
         # pylint)
@@ -69,7 +70,7 @@ class MultivariateGCI(QuantumCircuit):
             # compute slope / offset
             slope_list = []
             case=[]
-            for i in range(len(sectors)):
+            for i in range(self.sectors):
                 slope = -alphas[i] / np.sqrt(1 - rho) # -np.sqrt(rho)*alphas[i] / np.sqrt(1 - rho)
                 slope *= f(psi) / np.sqrt(1 - F(psi)) / np.sqrt(F(psi))
                 slope_list.append(slope)
@@ -78,7 +79,7 @@ class MultivariateGCI(QuantumCircuit):
             #print(offset)
 
             # adjust for integer to normal range mapping
-            for i in range(len(sectors)):
+            for i in range(self.sectors):
                 offset += slope_list[i] * (-normal_max_value)
                 slope_list[i] *= 2 * normal_max_value / (2 ** n_normal - 1)
 
@@ -87,7 +88,7 @@ class MultivariateGCI(QuantumCircuit):
             
         # create normal distributions        
         normal_distributions = []
-        for i in range(len(sectors)):
+        for i in range(self.sectors):
             dist = NormalDistribution(
                         n_normal,
                         0,
@@ -105,12 +106,12 @@ class MultivariateGCI(QuantumCircuit):
 
         for k, (slope, offset) in enumerate(zip(slopes, offsets)):
             #lry = LinearPauliRotations(n_normal, slope, offset)
-            for i in range(len(sectors)):
+            for i in range(self.sectors):
                 if i == 0:
                     lry = LinearPauliRotations(n_normal, slope[i], offset)
                 else:
                     lry = LinearPauliRotations(n_normal, slope[i], 0) 
-                qubits = list(range(i*n_normal,(i+1)*n_normal)) + [n_normal*len(sectors) + k]
+                qubits = list(range(i*n_normal,(i+1)*n_normal)) + [n_normal*self.sectors + k]
             
                 inner.append(lry.to_gate(), qubits)
 
@@ -178,7 +179,7 @@ class MultivariateGCI_woerner(QuantumCircuit):
 
         # create multivariate normal distribution
         normal_distribution = NormalDistribution(
-            list(np.zeros(len(alphas), dtype=int)+n_z),
+            list(np.zeros(len(alphas), dtype=int)+n_normal),
             list(np.zeros(len(alphas), dtype=int)),
             np.diag(np.array(alphas)**2), 
             bounds=[(-normal_max_value, normal_max_value) for i in range(len(alphas))],
