@@ -66,14 +66,13 @@ class MultivariateGCI_mr(QuantumCircuit):
             psi = F_inv(p_zero) / np.sqrt(1 - rho) 
             # compute slope / offset
             slope_list = []
-            case=[]
+
             for i in range(self.sectors):
                 slope = -ef[i] / np.sqrt(1 - rho) # -np.sqrt(rho)*ef[i] / np.sqrt(1 - rho)
                 slope *= f(psi) / np.sqrt(1 - F(psi)) / np.sqrt(F(psi))
                 slope_list.append(slope)
             
             offset = 2 * np.arcsin(np.sqrt(F(psi)))
-            #print(offset)
 
             # adjust for integer to normal range mapping
             for i in range(self.sectors):
@@ -108,8 +107,8 @@ class MultivariateGCI_mr(QuantumCircuit):
                     lry = LinearPauliRotations(n_normal, slope[i], offset)
                 else:
                     lry = LinearPauliRotations(n_normal, slope[i], 0) 
+
                 qubits = list(range(i*n_normal,(i+1)*n_normal)) + [n_normal*self.sectors + k]
-            
                 inner.append(lry.to_gate(), qubits)
 
         super().__init__(num_qubits, name="P(X)")
