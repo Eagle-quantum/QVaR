@@ -105,21 +105,19 @@ class MultivariateGCI_mr(QuantumCircuit):
 
         # build circuit
         inner = QuantumCircuit(num_qubits, name="P(X)")
-        #inner.append(normal_distribution.to_gate(), list(range(n_normal*2)))
         for i, el in enumerate(normal_distributions):
             inner.append(el.to_gate(), list(range(i*n_normal,(i+1)*n_normal)))
         #inner.draw()
 
         for k, (slope, offset) in enumerate(zip(slopes, offsets)):
-            #lry = LinearPauliRotations(n_normal, slope, offset)
             for i in range(self.sectors):
                 if i == 0:
-                    lry = PolynomialPauliRotations(n_normal, [offset, slope[0][i], 0, slope[1][i], 0, slope[2][i]])
+                    ry = PolynomialPauliRotations(n_normal, [offset, slope[0][i], 0, slope[1][i], 0, slope[2][i]])
                 else:
-                    lry = PolynomialPauliRotations(n_normal, [0, slope[0][i], 0, slope[1][i], 0, slope[2][i]]) 
+                    ry = PolynomialPauliRotations(n_normal, [0, slope[0][i], 0, slope[1][i], 0, slope[2][i]]) 
 
                 qubits = list(range(i*n_normal,(i+1)*n_normal)) + [n_normal*self.sectors + k]
-                inner.append(lry.to_gate(), qubits)
+                inner.append(ry.to_gate(), qubits)
 
         super().__init__(num_qubits, name="P(X)")
         self.append(inner.to_gate(), inner.qubits)
