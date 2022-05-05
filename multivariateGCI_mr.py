@@ -75,6 +75,7 @@ class MultivariateGCI_mr(QuantumCircuit):
             offset = 2 * np.arcsin(np.sqrt(F(psi)))
 
             # adjust for integer to normal range mapping
+            # (theta(z) = slope*z + offset) and z = realization / (2^n_normal-1) * 2*normal_max_value - normal_max_value
             for i in range(self.sectors):
                 offset += slope_list[i] * (-normal_max_value)
                 slope_list[i] *= 2 * normal_max_value / (2 ** n_normal - 1)
