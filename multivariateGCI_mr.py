@@ -17,7 +17,8 @@ import numpy as np
 from scipy.stats.distributions import norm
 
 from qiskit.circuit import QuantumCircuit
-from qiskit.circuit.library import LinearPauliRotations
+# from qiskit.circuit.library import LinearPauliRotations
+from qiskit.circuit.library import PolynomialPauliRotations
 from qiskit_finance.circuit.library import NormalDistribution
 
 class MultivariateGCI_mr(QuantumCircuit):
@@ -105,9 +106,9 @@ class MultivariateGCI_mr(QuantumCircuit):
             #lry = LinearPauliRotations(n_normal, slope, offset)
             for i in range(self.sectors):
                 if i == 0:
-                    lry = LinearPauliRotations(n_normal, slope[i], offset)
+                    lry = PolynomialPauliRotations(n_normal, [offset, slope[i]])
                 else:
-                    lry = LinearPauliRotations(n_normal, slope[i], 0) 
+                    lry = PolynomialPauliRotations(n_normal, [0, slope[i]]) 
 
                 qubits = list(range(i*n_normal,(i+1)*n_normal)) + [n_normal*self.sectors + k]
                 inner.append(lry.to_gate(), qubits)
