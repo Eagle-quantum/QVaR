@@ -65,24 +65,32 @@ class MultivariateGCI_mr(QuantumCircuit):
         offsets = []
         for rho, p_zero, ef in zip(rhos, p_zeros, F_list):
             psi = F_inv(p_zero) / np.sqrt(1 - rho) 
+            
             # compute slope / offset
-            slope_list = []
-
+            slope_list_f_o = []
+            slope_list_s_o = []
+            slope_list_t_o = []
             for i in range(self.sectors):
                 slope = -ef[i] / np.sqrt(1 - rho) # -np.sqrt(rho)*ef[i] / np.sqrt(1 - rho)
                 slope *= f(psi) / np.sqrt(1 - F(psi)) / np.sqrt(F(psi))
-                slope_list.append(slope)
+                slope_list_f_o.append(slope)
+                slope_list_s_o.append((slope**3)/6)
+                slope_list_t_o.append((slope**5)*3/40)
             
             offset = 2 * np.arcsin(np.sqrt(F(psi)))
 
             # adjust for integer to normal range mapping
             # (theta(z) = slope*z + offset) and z = realization / (2^n_normal-1) * 2*normal_max_value - normal_max_value
             for i in range(self.sectors):
-                offset += slope_list[i] * (-normal_max_value)
-                slope_list[i] *= 2 * normal_max_value / (2 ** n_normal - 1)
+                offset += slope_list_f_o[i] * (-normal_max_value)
+                slope_list_f_o[i] *= 2 * normal_max_value / (2 ** n_normal - 1)
+                offset += slope_list_s_o[i] * ((-normal_max_value)**3)
+                slope_list_s_o[i] *= 2 * normal_max_value**3 / ((2 ** n_normal - 1)**3)
+                offset += slope_list_t_o[i] * ((-normal_max_value)**5)
+                slope_list_t_o[i] *= 2 * normal_max_value**5 / ((2 ** n_normal - 1)**5)
 
             offsets += [offset]
-            slopes += [slope_list]
+            slopes += [(slope_list_f_o, slope_list_s_o, slope_list_t_o)]
             
         # create normal distributions        
         normal_distributions = []
@@ -106,9 +114,9 @@ class MultivariateGCI_mr(QuantumCircuit):
             #lry = LinearPauliRotations(n_normal, slope, offset)
             for i in range(self.sectors):
                 if i == 0:
-                    lry = PolynomialPauliRotations(n_normal, [offset, slope[i]])
+                    lry = PolynomialPauliRotations(n_normal, [offset, slope[0][i], 0, slope[1][i], 0, slope[2][i]])
                 else:
-                    lry = PolynomialPauliRotations(n_normal, [0, slope[i]]) 
+                    lry = PolynomialPauliRotations(n_normal, [0, slope[0][i], 0, slope[1][i], 0, slope[2][i]]) 
 
                 qubits = list(range(i*n_normal,(i+1)*n_normal)) + [n_normal*self.sectors + k]
                 inner.append(lry.to_gate(), qubits)
