@@ -7,9 +7,9 @@ from qiskit.algorithms import IterativeAmplitudeEstimation, EstimationProblem
 from qiskit.converters import circuit_to_dag
 
 
-def compute_depth(n_z, K, lgd, u, optimization_level = 0, k = 1):
+def compute_depth(n_z, risk_factors, K, lgd, u, optimization_level = 0, k = 1):
     
-    agg = WeightedAdder(n_z + K, [0] * n_z + lgd)
+    agg = WeightedAdder(n_z*risk_factors + K, [0] * n_z * risk_factors + lgd)
 
     # define linear objective function
     breakpoints = [0]
