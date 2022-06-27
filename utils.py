@@ -2,15 +2,7 @@ import numpy as np
 from multivariateGCI_mr import MultivariateGCI_mr
 from scipy.stats import norm
 
-from qiskit import QuantumRegister, QuantumCircuit, Aer, execute
-from qiskit.utils import QuantumInstance
-from qiskit.algorithms import IterativeAmplitudeEstimation, EstimationProblem
-from qiskit.providers.aer.noise import NoiseModel
-from qiskit.test.mock import FakeGuadalupe
-from qiskit.providers.aer import QasmSimulator 
 from qiskit.circuit.library import LinearAmplitudeFunction
-from qiskit import transpile
-from qiskit.converters import circuit_to_dag
 
 
 def rotation_mapping(p_zeros, F_values, rhos, n_z, z_max, n_factors, decimal_number, k):
